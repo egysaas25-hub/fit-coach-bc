@@ -9,6 +9,7 @@ import { HealthResolver } from './common/resolvers/health.resolver';
 import { BigIntScalar } from './common/scalars/bigint.scalar';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
     imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './auth/auth.module';
         PrismaModule,
         UsersModule,
         AuthModule,
+        CustomersModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })

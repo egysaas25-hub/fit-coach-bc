@@ -20,7 +20,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:deploy": "prisma migrate deploy",
-    "generate:schema": "ts-node scripts/generate-schema.ts"
+    "generate:schema": "ts-node -r tsconfig-paths/register scripts/generate-schema.ts"
   },
   "keywords": [],
   "author": "",
