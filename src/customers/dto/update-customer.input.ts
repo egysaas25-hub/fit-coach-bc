@@ -4,6 +4,10 @@ import { IsOptional, IsString, IsEmail } from 'class-validator';
 
 @InputType()
 export class UpdateCustomerInput extends PartialType(CreateCustomerInput) {
+    @Field()
+    @IsString()
+    id: string;
+
     @Field({ nullable: true })
     @IsOptional()
     @IsString()

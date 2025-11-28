@@ -33,6 +33,7 @@ export class CustomersService {
             skip: params.skip,
             take: params.take,
             where: params.where,
+            include: { subscriptions: true },
         });
         return customers.map((c) => this.mapToCustomer(c));
     }
@@ -40,6 +41,7 @@ export class CustomersService {
     async findOne(id: string): Promise<Customer | null> {
         const customer = await this.prisma.customers.findUnique({
             where: { id: BigInt(id) },
+            include: { subscriptions: true },
         });
         return customer ? this.mapToCustomer(customer) : null;
     }
@@ -56,6 +58,7 @@ export class CustomersService {
         const customer = await this.prisma.customers.update({
             where: { id: BigInt(id) },
             data: updateData,
+            include: { subscriptions: true },
         });
         return this.mapToCustomer(customer);
     }
@@ -71,6 +74,12 @@ export class CustomersService {
         const fullName = [customer.first_name, customer.last_name]
             .filter(Boolean)
             .join(' ');
+
+        // Find active subscription to get coach/trainer
+        const activeSubscription = customer.subscriptions?.find(
+            (sub: any) => sub.status === 'active'
+        );
+
         return {
             id: customer.id.toString(),
             tenantId: customer.tenant_id.toString(),
@@ -80,6 +89,7 @@ export class CustomersService {
             status: customer.status,
             createdAt: customer.created_at,
             updatedAt: customer.updated_at,
+            trainerId: activeSubscription?.coach_owner_id?.toString(),
         } as Customer;
     }
 }

@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { User } from '../../users/entities/user.entity';
 
 @ObjectType()
 export class Customer {
@@ -25,4 +26,9 @@ export class Customer {
 
     @Field()
     updatedAt: Date;
+
+    @Field(() => User, { nullable: true })
+    trainer?: User;
+
+    trainerId?: string; // Internal field for DataLoader
 }

@@ -10,6 +10,8 @@ import { BigIntScalar } from './common/scalars/bigint.scalar';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
+import { ExercisesModule } from './exercises/exercises.module';
+import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
     imports: [
@@ -35,6 +37,8 @@ import { CustomersModule } from './customers/customers.module';
         UsersModule,
         AuthModule,
         CustomersModule,
+        ExercisesModule,
+        WorkoutsModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })

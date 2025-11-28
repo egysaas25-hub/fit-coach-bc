@@ -21,6 +21,13 @@ export class UsersService {
         return user ? this.mapToUser(user) : null;
     }
 
+    async findByIds(ids: string[]): Promise<User[]> {
+        const users = await this.prisma.team_members.findMany({
+            where: { id: { in: ids.map(id => BigInt(id)) } },
+        });
+        return users.map(user => this.mapToUser(user));
+    }
+
     private mapToUser(teamMember: team_members): User {
         return {
             id: teamMember.id.toString(),

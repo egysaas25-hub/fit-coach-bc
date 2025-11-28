@@ -1,0 +1,176 @@
+FAIL src/customers/customers.resolver.spec.ts
+  CustomersResolver
+    × should construct correct where clause for search and status (14 ms)
+    × should handle empty filter (3 ms)
+    × should resolve trainer using UsersLoader (2 ms)
+    × should return null for trainer if trainerId is missing (2 ms)
+
+  ● CustomersResolver › should construct correct where clause for search and status
+
+    Nest can't resolve dependencies of the CustomersResolver (CustomersService, ?). Please make sure that the argument UsersLoader at index [1] is available in the RootTestModule context.
+
+    Potential solutions:
+    - Is RootTestModule a valid NestJS module?
+    - If UsersLoader is a provider, is it part of the current RootTestModule?
+    - If UsersLoader is exported from a separate @Module, is that module imported within RootTestModule?
+      @Module({
+        imports: [ /* the Module containing UsersLoader */ ]
+      })
+
+    For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m     beforeEach([36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 15 |[39m         [36mconst[39m module[33m:[39m [33mTestingModule[39m [33m=[39m [36mawait[39m [33mTest[39m[33m.[39mcreateTestingModule({
+     [90m    |[39m                                       [31m[1m^[22m[39m
+     [90m 16 |[39m             providers[33m:[39m [
+     [90m 17 |[39m                 [33mCustomersResolver[39m[33m,[39m
+     [90m 18 |[39m                 { provide[33m:[39m [33mCustomersService[39m[33m,[39m useValue[33m:[39m mockCustomersService }[33m,[39m[0m
+
+      at TestingInjector.lookupComponentInParentModules (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:286:19)
+      at TestingInjector.resolveComponentWrapper (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:140:38)
+          at async Promise.all (index 1)
+      at TestingInjector.resolveConstructorParams (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:169:27)
+      at TestingInjector.loadInstance (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:75:13)
+      at TestingInjector.loadProvider (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:103:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:56:13
+          at async Promise.all (index 3)
+      at TestingInstanceLoader.createInstancesOfProviders (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:40:13
+          at async Promise.all (index 1)
+      at TestingInstanceLoader.createInstances (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:39:9)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:22:13)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (customers/customers.resolver.spec.ts:15:39)
+
+  ● CustomersResolver › should handle empty filter
+
+    Nest can't resolve dependencies of the CustomersResolver (CustomersService, ?). Please make sure that the argument UsersLoader at index [1] is available in the RootTestModule context.
+
+    Potential solutions:
+    - Is RootTestModule a valid NestJS module?
+    - If UsersLoader is a provider, is it part of the current RootTestModule?
+    - If UsersLoader is exported from a separate @Module, is that module imported within RootTestModule?
+      @Module({
+        imports: [ /* the Module containing UsersLoader */ ]
+      })
+
+    For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m     beforeEach([36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 15 |[39m         [36mconst[39m module[33m:[39m [33mTestingModule[39m [33m=[39m [36mawait[39m [33mTest[39m[33m.[39mcreateTestingModule({
+     [90m    |[39m                                       [31m[1m^[22m[39m
+     [90m 16 |[39m             providers[33m:[39m [
+     [90m 17 |[39m                 [33mCustomersResolver[39m[33m,[39m
+     [90m 18 |[39m                 { provide[33m:[39m [33mCustomersService[39m[33m,[39m useValue[33m:[39m mockCustomersService }[33m,[39m[0m
+
+      at TestingInjector.lookupComponentInParentModules (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:286:19)
+      at TestingInjector.resolveComponentWrapper (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:140:38)
+          at async Promise.all (index 1)
+      at TestingInjector.resolveConstructorParams (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:169:27)
+      at TestingInjector.loadInstance (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:75:13)
+      at TestingInjector.loadProvider (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:103:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:56:13
+          at async Promise.all (index 3)
+      at TestingInstanceLoader.createInstancesOfProviders (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:40:13
+          at async Promise.all (index 1)
+      at TestingInstanceLoader.createInstances (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:39:9)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:22:13)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (customers/customers.resolver.spec.ts:15:39)
+
+  ● CustomersResolver › should resolve trainer using UsersLoader
+
+    Nest can't resolve dependencies of the CustomersResolver (CustomersService, ?). Please make sure that the argument UsersLoader at index [1] is available in the RootTestModule context.
+
+    Potential solutions:
+    - Is RootTestModule a valid NestJS module?
+    - If UsersLoader is a provider, is it part of the current RootTestModule?
+    - If UsersLoader is exported from a separate @Module, is that module imported within RootTestModule?
+      @Module({
+        imports: [ /* the Module containing UsersLoader */ ]
+      })
+
+    For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m     beforeEach([36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 15 |[39m         [36mconst[39m module[33m:[39m [33mTestingModule[39m [33m=[39m [36mawait[39m [33mTest[39m[33m.[39mcreateTestingModule({
+     [90m    |[39m                                       [31m[1m^[22m[39m
+     [90m 16 |[39m             providers[33m:[39m [
+     [90m 17 |[39m                 [33mCustomersResolver[39m[33m,[39m
+     [90m 18 |[39m                 { provide[33m:[39m [33mCustomersService[39m[33m,[39m useValue[33m:[39m mockCustomersService }[33m,[39m[0m
+
+      at TestingInjector.lookupComponentInParentModules (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:286:19)
+      at TestingInjector.resolveComponentWrapper (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:140:38)
+          at async Promise.all (index 1)
+      at TestingInjector.resolveConstructorParams (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:169:27)
+      at TestingInjector.loadInstance (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:75:13)
+      at TestingInjector.loadProvider (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:103:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:56:13
+          at async Promise.all (index 3)
+      at TestingInstanceLoader.createInstancesOfProviders (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:40:13
+          at async Promise.all (index 1)
+      at TestingInstanceLoader.createInstances (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:39:9)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:22:13)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (customers/customers.resolver.spec.ts:15:39)
+
+  ● CustomersResolver › should return null for trainer if trainerId is missing
+
+    Nest can't resolve dependencies of the CustomersResolver (CustomersService, ?). Please make sure that the argument UsersLoader at index [1] is available in the RootTestModule context.
+
+    Potential solutions:
+    - Is RootTestModule a valid NestJS module?
+    - If UsersLoader is a provider, is it part of the current RootTestModule?
+    - If UsersLoader is exported from a separate @Module, is that module imported within RootTestModule?
+      @Module({
+        imports: [ /* the Module containing UsersLoader */ ]
+      })
+
+    For more common dependency resolution issues, see: https://docs.nestjs.com/faq/common-errors
+
+    [0m [90m 13 |[39m
+     [90m 14 |[39m     beforeEach([36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 15 |[39m         [36mconst[39m module[33m:[39m [33mTestingModule[39m [33m=[39m [36mawait[39m [33mTest[39m[33m.[39mcreateTestingModule({
+     [90m    |[39m                                       [31m[1m^[22m[39m
+     [90m 16 |[39m             providers[33m:[39m [
+     [90m 17 |[39m                 [33mCustomersResolver[39m[33m,[39m
+     [90m 18 |[39m                 { provide[33m:[39m [33mCustomersService[39m[33m,[39m useValue[33m:[39m mockCustomersService }[33m,[39m[0m
+
+      at TestingInjector.lookupComponentInParentModules (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:286:19)
+      at TestingInjector.resolveComponentWrapper (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-injector.js:19:45)
+      at resolveParam (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:140:38)
+          at async Promise.all (index 1)
+      at TestingInjector.resolveConstructorParams (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:169:27)
+      at TestingInjector.loadInstance (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:75:13)
+      at TestingInjector.loadProvider (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/injector.js:103:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:56:13
+          at async Promise.all (index 3)
+      at TestingInstanceLoader.createInstancesOfProviders (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:55:9)
+      at ../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:40:13
+          at async Promise.all (index 1)
+      at TestingInstanceLoader.createInstances (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:39:9)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+core@11.1.9_@nestjs_35aa21069415c61cc2ff03470cea104c/node_modules/@nestjs/core/injector/instance-loader.js:22:13)
+      at TestingInstanceLoader.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-instance-loader.js:9:9)
+      at TestingModuleBuilder.createInstancesOfDependencies (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:118:9)
+      at TestingModuleBuilder.compile (../node_modules/.pnpm/@nestjs+testing@11.1.9_@nes_5fa0f54bf7d8c8acec998f5e81836857/node_modules/@nestjs/testing/testing-module.builder.js:74:9)
+      at Object.<anonymous> (customers/customers.resolver.spec.ts:15:39)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 4 total
+Snapshots:   0 total
+Time:        3.722 s, estimated 4 s
+Ran all test suites matching src/customers/customers.resolver.spec.ts.
