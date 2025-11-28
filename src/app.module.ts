@@ -17,6 +17,7 @@ import { AiModule } from './ai/ai.module';
 import { ProgressModule } from './progress/progress.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { AutomationModule } from './automation/automation.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
     imports: [
@@ -49,6 +50,7 @@ import { AutomationModule } from './automation/automation.module';
         ProgressModule,
         MessagingModule,
         AutomationModule,
+        AnalyticsModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })
