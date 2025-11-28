@@ -15,6 +15,8 @@ import { WorkoutsModule } from './workouts/workouts.module';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { AiModule } from './ai/ai.module';
 import { ProgressModule } from './progress/progress.module';
+import { MessagingModule } from './messaging/messaging.module';
+import { AutomationModule } from './automation/automation.module';
 
 @Module({
     imports: [
@@ -45,6 +47,8 @@ import { ProgressModule } from './progress/progress.module';
         NutritionModule,
         AiModule,
         ProgressModule,
+        MessagingModule,
+        AutomationModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })
