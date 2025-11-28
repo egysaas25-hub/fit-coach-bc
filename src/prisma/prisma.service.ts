@@ -11,6 +11,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     async onModuleInit() {
+        if (process.env.SKIP_DB_CONNECTION === 'true') {
+            console.log('⚠️ Skipping database connection (SKIP_DB_CONNECTION is set)');
+            return;
+        }
         await this.$connect();
         console.log('✅ Database connected successfully');
     }

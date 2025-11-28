@@ -5,6 +5,10 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
 import { DateScalar } from './common/scalars/date.scalar';
+import { HealthResolver } from './common/resolvers/health.resolver';
+import { BigIntScalar } from './common/scalars/bigint.scalar';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -27,7 +31,9 @@ import { DateScalar } from './common/scalars/date.scalar';
             },
         }),
         PrismaModule,
+        UsersModule,
+        AuthModule,
     ],
-    providers: [DateScalar],
+    providers: [DateScalar, BigIntScalar, HealthResolver],
 })
 export class AppModule { }
