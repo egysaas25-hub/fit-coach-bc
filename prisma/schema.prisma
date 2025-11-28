@@ -1,0 +1,1172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model approval_workflows {
+  id                                                         BigInt        @id @default(autoincrement())
+  tenant_id                                                  BigInt
+  entity_type                                                String
+  entity_id                                                  BigInt
+  status                                                     String        @default("pending")
+  submitted_by                                               BigInt
+  reviewed_by                                                BigInt?
+  reviewed_at                                                DateTime?     @db.Timestamptz(6)
+  notes                                                      String?
+  metadata                                                   Json?
+  created_at                                                 DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at                                                 DateTime      @default(now()) @db.Timestamptz(6)
+  team_members_approval_workflows_reviewed_byToteam_members  team_members? @relation("approval_workflows_reviewed_byToteam_members", fields: [reviewed_by], references: [id])
+  team_members_approval_workflows_submitted_byToteam_members team_members  @relation("approval_workflows_submitted_byToteam_members", fields: [submitted_by], references: [id])
+  tenants                                                    tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status, entity_type], map: "idx_approval_workflows_status")
+  @@index([tenant_id, submitted_by], map: "idx_approval_workflows_submitter")
+}
+
+model audit_log {
+  id                   BigInt        @id @default(autoincrement())
+  tenant_id            BigInt
+  actor_team_member_id BigInt?
+  entity               String
+  entity_id            BigInt?
+  action               String
+  diff                 Json?
+  created_at           DateTime      @default(now()) @db.Timestamptz(6)
+  team_members         team_members? @relation(fields: [actor_team_member_id], references: [id])
+  tenants              tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model ai_generation_logs {
+  id              BigInt   @id @default(autoincrement())
+  tenant_id       BigInt
+  generated_by    BigInt?
+  generation_type String
+  prompt          String?
+  parameters      Json?
+  response        Json?
+  tokens_used     Int      @default(0)
+  cost_usd        Decimal  @default(0) @db.Decimal(10, 4)
+  success         Boolean  @default(true)
+  error_message   String?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  tenants      tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  team_members team_members? @relation(fields: [generated_by], references: [id])
+}
+
+model automation_workflows {
+  id           BigInt       @id @default(autoincrement())
+  tenant_id    BigInt
+  name         String
+  description  String?
+  trigger      String
+  actions      Json
+  category     String?
+  is_active    Boolean      @default(true)
+  executions   Int          @default(0)
+  success_rate Float        @default(0)
+  last_run_at  DateTime?    @db.Timestamptz(6)
+  created_by   BigInt
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime     @default(now()) @db.Timestamptz(6)
+  team_members team_members @relation(fields: [created_by], references: [id])
+  tenants      tenants      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, is_active], map: "idx_automation_workflows_active")
+  @@index([tenant_id, category], map: "idx_automation_workflows_category")
+}
+
+model background_jobs {
+  id         BigInt     @id @default(autoincrement())
+  tenant_id  BigInt
+  name       String
+  args       Json?
+  status     job_status @default(queued)
+  attempts   Int        @default(0) @db.SmallInt
+  last_error String?
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime   @default(now()) @db.Timestamptz(6)
+  tenants    tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model checkins {
+  id           BigInt          @id @default(autoincrement())
+  tenant_id    BigInt
+  customer_id  BigInt
+  period       checkin_period
+  inbody_json  Json?
+  checkin_date DateTime        @db.Date
+  reviewed_by  BigInt?
+  reviewed_at  DateTime?       @db.Timestamptz(6)
+  action_taken checkin_action?
+  customers    customers       @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  team_members team_members?   @relation(fields: [reviewed_by], references: [id])
+  tenants      tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, checkin_date], map: "idx_checkins_customer")
+}
+
+model churn_feedback {
+  id          BigInt     @id @default(autoincrement())
+  tenant_id   BigInt
+  customer_id BigInt?
+  reason      String
+  notes       String?
+  recorded_at DateTime   @default(now()) @db.Timestamptz(6)
+  customers   customers? @relation(fields: [customer_id], references: [id])
+  tenants     tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model conversations {
+  id                BigInt              @id @default(autoincrement())
+  tenant_id         BigInt
+  customer_id       BigInt
+  channel           interaction_channel @default(wa)
+  started_at        DateTime            @default(now()) @db.Timestamptz(6)
+  last_activity_at  DateTime            @default(now()) @db.Timestamptz(6)
+  customers         customers           @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants           tenants             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  inbound_messages  inbound_messages[]
+  outbound_messages outbound_messages[]
+}
+
+model currencies {
+  id             BigInt          @id @default(autoincrement())
+  code           String          @unique
+  name           String
+  fx_rate_to_usd Decimal         @db.Decimal(10, 4)
+  updated_at     DateTime        @default(now()) @db.Timestamptz(6)
+  customers      customers[]
+  payments       payments[]
+  plan_pricing   plan_pricing[]
+  subscriptions  subscriptions[]
+  tenants        tenants[]
+}
+
+model customer_health_conditions {
+  id             BigInt    @id @default(autoincrement())
+  customer_id    BigInt
+  condition_text String
+  severity       severity?
+  diagnosed_at   DateTime? @db.Date
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  customers      customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model customer_metrics {
+  id                   BigInt             @id @default(autoincrement())
+  tenant_id            BigInt
+  customer_id          BigInt
+  metric_definition_id BigInt
+  metric_value         Decimal            @db.Decimal(12, 4)
+  category             String
+  recorded_at          DateTime           @default(now()) @db.Timestamptz(6)
+  created_by           BigInt
+  team_members         team_members       @relation(fields: [created_by], references: [id])
+  customers            customers          @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  metric_definitions   metric_definitions @relation(fields: [metric_definition_id], references: [id])
+  tenants              tenants            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, recorded_at], map: "idx_metrics_customer")
+}
+
+model customer_profiles {
+  id           BigInt    @id @default(autoincrement())
+  customer_id  BigInt    @unique
+  notes        String?
+  lifestyle    Json?
+  medical_json Json?
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime  @default(now()) @db.Timestamptz(6)
+  customers    customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model customers {
+  id                         BigInt                       @id @default(autoincrement())
+  tenant_id                  BigInt
+  phone_e164                 String
+  phone_e164_encrypted       Bytes?
+  wa_contact_id              String?
+  first_name                 String?
+  last_name                  String?
+  gender                     gender?
+  age                        Int?                         @db.SmallInt
+  height_cm                  Int?                         @db.SmallInt
+  start_weight_kg            Decimal?                     @db.Decimal(6, 2)
+  country                    String?
+  city                       String?
+  region                     region                       @default(MENA)
+  timezone                   String                       @default("Africa/Cairo")
+  source                     source
+  status                     customer_status
+  goal                       String?
+  language                   language                     @default(en)
+  preferred_currency_id      BigInt?
+  consent_at                 DateTime?                    @db.Timestamptz(6)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  checkins                   checkins[]
+  churn_feedback             churn_feedback[]
+  conversations              conversations[]
+  customer_health_conditions customer_health_conditions[]
+  customer_metrics           customer_metrics[]
+  customer_profiles          customer_profiles?
+  currencies                 currencies?                  @relation(fields: [preferred_currency_id], references: [id])
+  tenants                    tenants                      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  funnel_events              funnel_events[]
+  inbody_metrics             inbody_metrics[]
+  inbound_messages           inbound_messages[]
+  interactions               interactions[]
+  nutrition_plans            nutrition_plans[]
+  outbound_messages          outbound_messages[]
+  payments                   payments[]
+  progress_tracking          progress_tracking[]
+  referrals                  referrals[]
+  subscriptions              subscriptions[]
+  tickets                    tickets[]
+  training_plans             training_plans[]
+  uploaded_files             uploaded_files[]
+
+  @@unique([tenant_id, phone_e164])
+  @@index([tenant_id, id], map: "idx_customers_active")
+  @@index([tenant_id, phone_e164], map: "idx_customers_phone")
+}
+
+model data_access_log {
+  id             BigInt        @id @default(autoincrement())
+  tenant_id      BigInt
+  team_member_id BigInt?
+  action         String
+  entity         String
+  entity_id      BigInt?
+  ip_address     String?
+  user_agent     String?
+  created_at     DateTime      @default(now()) @db.Timestamptz(6)
+  team_members   team_members? @relation(fields: [team_member_id], references: [id])
+  tenants        tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model exercises {
+  id                      BigInt                    @id @default(autoincrement())
+  tenant_id               BigInt
+  name                    Json
+  training_type_id        BigInt?
+  muscle_group_id         BigInt?
+  description             Json?
+  equipment_needed        String?
+  calories_burned_per_min Decimal?                  @db.Decimal(6, 2)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  muscle_groups           muscle_groups?            @relation(fields: [muscle_group_id], references: [id])
+  tenants                 tenants                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  training_types          training_types?           @relation(fields: [training_type_id], references: [id])
+  training_plan_exercises training_plan_exercises[]
+
+  @@unique([tenant_id, name])
+}
+
+model funnel_events {
+  id          BigInt    @id @default(autoincrement())
+  tenant_id   BigInt
+  customer_id BigInt
+  event_name  String
+  event_at    DateTime  @default(now()) @db.Timestamptz(6)
+  meta        Json?
+  customers   customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants     tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, event_name, event_at], map: "idx_funnel_tenant_event")
+}
+
+model goal_templates {
+  id           BigInt        @id @default(autoincrement())
+  tenant_id    BigInt
+  name         String        @db.VarChar(255)
+  description  String?
+  category     String        @db.VarChar(100)
+  duration     String?       @db.VarChar(50)
+  features     Json?
+  created_by   BigInt?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime      @default(now()) @db.Timestamptz(6)
+  is_active    Boolean       @default(true)
+  team_members team_members? @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tenants      tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([tenant_id, is_active], map: "idx_goal_templates_active")
+  @@index([tenant_id, category], map: "idx_goal_templates_category")
+  @@index([tenant_id], map: "idx_goal_templates_tenant")
+}
+
+model inbody_metrics {
+  id                 BigInt    @id @default(autoincrement())
+  tenant_id          BigInt
+  customer_id        BigInt
+  recorded_at        DateTime  @default(now()) @db.Timestamptz(6)
+  height_cm          Decimal?  @db.Decimal(6, 2)
+  weight_kg          Decimal?  @db.Decimal(6, 2)
+  bmi                Decimal?  @db.Decimal(6, 2)
+  body_fat_percent   Decimal?  @db.Decimal(6, 2)
+  muscle_mass_kg     Decimal?  @db.Decimal(6, 2)
+  water_percent      Decimal?  @db.Decimal(6, 2)
+  visceral_fat_level Decimal?  @db.Decimal(6, 2)
+  bmr_kcal           Int?
+  tdee_kcal          Int?
+  systolic_bp        Int?
+  diastolic_bp       Int?
+  heart_rate_bpm     Int?
+  spo2_percent       Decimal?  @db.Decimal(6, 2)
+  body_temp_c        Decimal?  @db.Decimal(4, 1)
+  notes              String?
+  customers          customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants            tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, recorded_at], map: "idx_inbody_customer")
+}
+
+model inbound_messages {
+  id                     BigInt                @id @default(autoincrement())
+  tenant_id              BigInt
+  conversation_id        BigInt?
+  customer_id            BigInt
+  integration_account_id BigInt?
+  wa_message_id          String?
+  text                   String?
+  received_at            DateTime              @default(now()) @db.Timestamptz(6)
+  meta                   Json?
+  conversations          conversations?        @relation(fields: [conversation_id], references: [id])
+  customers              customers             @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  integration_accounts   integration_accounts? @relation(fields: [integration_account_id], references: [id])
+  tenants                tenants               @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, received_at], map: "idx_inbound_customer_time")
+  @@index([tenant_id, conversation_id, received_at], map: "idx_inbound_tenant_conversation")
+}
+
+model integration_accounts {
+  id                    BigInt                  @id @default(autoincrement())
+  tenant_id             BigInt
+  integration_id        BigInt
+  account_name          String
+  auth_type             auth_type
+  secret_ref            String?
+  metadata              Json?
+  is_default            Boolean                 @default(false)
+  is_enabled            Boolean                 @default(true)
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  inbound_messages      inbound_messages[]
+  integrations          integrations            @relation(fields: [integration_id], references: [id], onDelete: Cascade)
+  tenants               tenants                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  outbound_messages     outbound_messages[]
+  webhook_subscriptions webhook_subscriptions[]
+}
+
+model integrations {
+  id                   BigInt                 @id @default(autoincrement())
+  tenant_id            BigInt
+  name                 String
+  provider             String
+  type                 integration_type
+  base_url             String?
+  docs_url             String?
+  is_enabled           Boolean                @default(true)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
+  integration_accounts integration_accounts[]
+  tenants              tenants                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, name])
+}
+
+model interactions {
+  id                BigInt                @id @default(autoincrement())
+  tenant_id         BigInt
+  customer_id       BigInt
+  channel           interaction_channel
+  direction         interaction_direction
+  intent_code       String?
+  message_text      String?
+  by_team_member_id BigInt?
+  sent_at           DateTime              @default(now()) @db.Timestamptz(6)
+  meta              Json?
+  team_members      team_members?         @relation(fields: [by_team_member_id], references: [id])
+  customers         customers             @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants           tenants               @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, sent_at], map: "idx_interactions_customer")
+}
+
+model job_runs {
+  id              BigInt         @id @default(autoincrement())
+  job_id          BigInt
+  started_at      DateTime       @default(now()) @db.Timestamptz(6)
+  finished_at     DateTime?      @db.Timestamptz(6)
+  status          job_status
+  items_processed Int            @default(0)
+  error           String?
+  meta            Json?
+  scheduler_jobs  scheduler_jobs @relation(fields: [job_id], references: [id], onDelete: Cascade)
+}
+
+model media_library {
+  id          BigInt   @id @default(autoincrement())
+  tenant_id   BigInt
+  title       Json
+  type        String
+  description Json?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  tenants     tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model media_references {
+  id          BigInt     @id @default(autoincrement())
+  tenant_id   BigInt
+  entity_type String
+  entity_id   BigInt
+  url         String
+  type        media_type
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  tenants     tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model message_templates {
+  id                BigInt              @id @default(autoincrement())
+  tenant_id         BigInt
+  name              String
+  content           String
+  language          language
+  approved_at       DateTime?           @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  tenants           tenants             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  outbound_messages outbound_messages[]
+
+  @@unique([tenant_id, name, language])
+}
+
+model metric_definitions {
+  id               BigInt             @id @default(autoincrement())
+  tenant_id        BigInt
+  name             String
+  unit             String?
+  description      String?
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  customer_metrics customer_metrics[]
+  tenants          tenants            @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, name])
+}
+
+model muscle_groups {
+  id          BigInt      @id @default(autoincrement())
+  tenant_id   BigInt
+  name        Json
+  description Json?
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  exercises   exercises[]
+  tenants     tenants     @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, name])
+}
+
+model nutrition_facts {
+  id                   BigInt                 @id @default(autoincrement())
+  tenant_id            BigInt
+  food_name            Json
+  portion_size         String
+  calories             Decimal?               @db.Decimal(6, 2)
+  protein_g            Decimal?               @db.Decimal(6, 2)
+  carbs_g              Decimal?               @db.Decimal(6, 2)
+  fat_g                Decimal?               @db.Decimal(6, 2)
+  fiber_g              Decimal?               @db.Decimal(6, 2)
+  category             String?
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  tenants              tenants                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  nutrition_meal_items nutrition_meal_items[]
+
+  @@unique([tenant_id, food_name])
+}
+
+model nutrition_meal_items {
+  id              BigInt           @id @default(autoincrement())
+  tenant_id       BigInt
+  meal_id         BigInt
+  food_name       String
+  food_id         BigInt?
+  portion_size    String?
+  calories        Decimal?         @db.Decimal(6, 2)
+  protein_g       Decimal?         @db.Decimal(6, 2)
+  carbs_g         Decimal?         @db.Decimal(6, 2)
+  fat_g           Decimal?         @db.Decimal(6, 2)
+  fiber_g         Decimal?         @db.Decimal(6, 2)
+  alternatives    Json?
+  order_index     Int              @db.SmallInt
+  nutrition_facts nutrition_facts? @relation(fields: [food_id], references: [id])
+  nutrition_meals nutrition_meals  @relation(fields: [meal_id], references: [id], onDelete: Cascade)
+  tenants         tenants          @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model nutrition_meals {
+  id                   BigInt                 @id @default(autoincrement())
+  tenant_id            BigInt
+  plan_id              BigInt
+  meal_name            String
+  order_index          Int                    @db.SmallInt
+  notes                String?
+  nutrition_meal_items nutrition_meal_items[]
+  nutrition_plans      nutrition_plans        @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  tenants              tenants                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model nutrition_plan_macros {
+  id              BigInt          @id @default(autoincrement())
+  plan_id         BigInt
+  calories        Decimal?        @db.Decimal(6, 2)
+  protein_g       Decimal?        @db.Decimal(6, 2)
+  carbs_g         Decimal?        @db.Decimal(6, 2)
+  fat_g           Decimal?        @db.Decimal(6, 2)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  nutrition_plans nutrition_plans @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+}
+
+model nutrition_plans {
+  id                    BigInt                  @id @default(autoincrement())
+  tenant_id             BigInt
+  customer_id           BigInt
+  version               Int
+  is_active             Boolean                 @default(true)
+  calories_target       Int?                    @db.SmallInt
+  notes                 String?
+  created_by            BigInt
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  status                String                  @default("approved") @db.VarChar(50)
+  nutrition_meals       nutrition_meals[]
+  nutrition_plan_macros nutrition_plan_macros[]
+  team_members          team_members            @relation(fields: [created_by], references: [id])
+  customers             customers               @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants               tenants                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, created_at], map: "idx_nutrition_customer")
+  @@index([tenant_id, status], map: "idx_nutrition_plans_status")
+}
+
+model otp_codes {
+  id         BigInt   @id @default(autoincrement())
+  phone_e164 String
+  code_hash  String
+  expires_at DateTime @db.Timestamptz(6)
+  attempts   Int      @default(0) @db.SmallInt
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([phone_e164, expires_at], map: "idx_otp_phone_expires")
+}
+
+model outbound_messages {
+  id                     BigInt                  @id @default(autoincrement())
+  tenant_id              BigInt
+  conversation_id        BigInt?
+  customer_id            BigInt
+  integration_account_id BigInt?
+  template_id            BigInt?
+  text                   String?
+  send_after             DateTime?               @db.Timestamptz(6)
+  status                 outbound_message_status @default(queued)
+  error                  String?
+  attempts               Int                     @default(0) @db.SmallInt
+  priority               Int                     @default(5) @db.SmallInt
+  dedupe_key             String?
+  created_at             DateTime                @default(now()) @db.Timestamptz(6)
+  sent_at                DateTime?               @db.Timestamptz(6)
+  conversations          conversations?          @relation(fields: [conversation_id], references: [id])
+  customers              customers               @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  integration_accounts   integration_accounts?   @relation(fields: [integration_account_id], references: [id])
+  message_templates      message_templates?      @relation(fields: [template_id], references: [id])
+  tenants                tenants                 @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, status, created_at], map: "idx_outbound_customer_status")
+  @@index([tenant_id, send_after], map: "idx_outbound_send_after")
+}
+
+model payments {
+  id               BigInt          @id @default(autoincrement())
+  tenant_id        BigInt
+  customer_id      BigInt
+  subscription_id  BigInt?
+  gateway          payment_gateway
+  provider_region  region
+  amount_cents     Int
+  currency_id      BigInt
+  amount_usd       Decimal?        @db.Decimal(10, 2)
+  fx_rate          Decimal?        @db.Decimal(10, 4)
+  status           payment_status
+  paid_at          DateTime?       @db.Timestamptz(6)
+  receipt_url      String?
+  installment_plan Json?
+  meta             Json?
+  currencies       currencies      @relation(fields: [currency_id], references: [id])
+  customers        customers       @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  subscriptions    subscriptions?  @relation(fields: [subscription_id], references: [id], onDelete: Cascade)
+  tenants          tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model plan_pricing {
+  id          BigInt     @id @default(autoincrement())
+  tenant_id   BigInt
+  plan_code   String
+  country     String
+  currency_id BigInt
+  price_cents Int
+  active      Boolean    @default(true)
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  currencies  currencies @relation(fields: [currency_id], references: [id])
+  tenants     tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model progress_tracking {
+  id           BigInt    @id @default(autoincrement())
+  tenant_id    BigInt
+  customer_id  BigInt
+  recorded_at  DateTime  @default(now()) @db.Timestamptz(6)
+  weight_kg    Decimal?  @db.Decimal(6, 2)
+  workout_done Boolean?
+  sleep_hours  Decimal?  @db.Decimal(3, 1)
+  pain_score   Int?      @db.SmallInt
+  notes        String?
+  customers    customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants      tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, recorded_at], map: "idx_progress_customer")
+}
+
+model referrals {
+  id                        BigInt         @id @default(autoincrement())
+  tenant_id                 BigInt
+  referrer_customer_id      BigInt
+  invite_code               String
+  referred_phone            String
+  converted_subscription_id BigInt?
+  reward_cents              Int            @default(0)
+  status                    String
+  subscriptions             subscriptions? @relation(fields: [converted_subscription_id], references: [id])
+  customers                 customers      @relation(fields: [referrer_customer_id], references: [id])
+  tenants                   tenants        @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model scheduler_jobs {
+  id         BigInt     @id @default(autoincrement())
+  tenant_id  BigInt
+  name       String
+  cron_expr  String
+  handler    String
+  is_active  Boolean    @default(true)
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at DateTime   @default(now()) @db.Timestamptz(6)
+  job_runs   job_runs[]
+  tenants    tenants    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, name])
+}
+
+model subscriptions {
+  id                                                      BigInt              @id @default(autoincrement())
+  tenant_id                                               BigInt
+  customer_id                                             BigInt
+  plan_code                                               String
+  price_cents                                             Int
+  currency_id                                             BigInt
+  amount_usd                                              Decimal?            @db.Decimal(10, 2)
+  fx_rate                                                 Decimal?            @db.Decimal(10, 4)
+  status                                                  subscription_status
+  start_at                                                DateTime            @db.Timestamptz(6)
+  renew_at                                                DateTime?           @db.Timestamptz(6)
+  cancel_at                                               DateTime?           @db.Timestamptz(6)
+  sales_owner_id                                          BigInt?
+  coach_owner_id                                          BigInt?
+  rotation_priority                                       Int                 @default(0) @db.SmallInt
+  created_at                                              DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at                                              DateTime            @default(now()) @db.Timestamptz(6)
+  payments                                                payments[]
+  referrals                                               referrals[]
+  team_members_subscriptions_coach_owner_idToteam_members team_members?       @relation("subscriptions_coach_owner_idToteam_members", fields: [coach_owner_id], references: [id])
+  currencies                                              currencies          @relation(fields: [currency_id], references: [id])
+  customers                                               customers           @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  team_members_subscriptions_sales_owner_idToteam_members team_members?       @relation("subscriptions_sales_owner_idToteam_members", fields: [sales_owner_id], references: [id])
+  tenants                                                 tenants             @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id], map: "idx_subscriptions_active")
+  @@index([tenant_id, renew_at], map: "idx_subscriptions_renew")
+}
+
+model system_settings {
+  id           BigInt       @id @default(autoincrement())
+  tenant_id    BigInt
+  category     String
+  settings     Json
+  updated_by   BigInt
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime     @default(now()) @db.Timestamptz(6)
+  tenants      tenants      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  team_members team_members @relation(fields: [updated_by], references: [id])
+
+  @@unique([tenant_id, category])
+  @@index([tenant_id, category], map: "idx_system_settings_tenant_category")
+}
+
+model team_members {
+  id                                                               BigInt                 @id @default(autoincrement())
+  tenant_id                                                        BigInt
+  full_name                                                        String
+  email                                                            String
+  role                                                             role
+  wa_user_id                                                       String?
+  max_caseload                                                     Int                    @default(0) @db.SmallInt
+  active                                                           Boolean                @default(true)
+  created_at                                                       DateTime               @default(now()) @db.Timestamptz(6)
+  phone_e164                                                       String?                @db.VarChar(20)
+  approval_workflows_approval_workflows_reviewed_byToteam_members  approval_workflows[]   @relation("approval_workflows_reviewed_byToteam_members")
+  approval_workflows_approval_workflows_submitted_byToteam_members approval_workflows[]   @relation("approval_workflows_submitted_byToteam_members")
+  audit_log                                                        audit_log[]
+  automation_workflows                                             automation_workflows[]
+  checkins                                                         checkins[]
+  customer_metrics                                                 customer_metrics[]
+  data_access_log                                                  data_access_log[]
+  goal_templates                                                   goal_templates[]
+  interactions                                                     interactions[]
+  nutrition_plans                                                  nutrition_plans[]
+  subscriptions_subscriptions_coach_owner_idToteam_members         subscriptions[]        @relation("subscriptions_coach_owner_idToteam_members")
+  subscriptions_subscriptions_sales_owner_idToteam_members         subscriptions[]        @relation("subscriptions_sales_owner_idToteam_members")
+  system_settings                                                  system_settings[]
+  tenants                                                          tenants                @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tickets                                                          tickets[]
+  training_plans                                                   training_plans[]
+  uploaded_files                                                   uploaded_files[]
+  user_permissions                                                 user_permissions?
+  ai_generation_logs                                               ai_generation_logs[]
+
+  @@unique([tenant_id, email])
+}
+
+model tenant_branding {
+  id              BigInt   @id @default(autoincrement())
+  tenant_id       BigInt
+  logo_url        String?
+  primary_color   String?
+  whatsapp_number String?
+  template_config Json?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  tenants         tenants  @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+}
+
+model tenants {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String
+  slug                 String                 @unique
+  country              String?
+  timezone             String                 @default("Africa/Cairo")
+  currency_id          BigInt?
+  default_language     language               @default(en)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  approval_workflows   approval_workflows[]
+  audit_log            audit_log[]
+  automation_workflows automation_workflows[]
+  background_jobs      background_jobs[]
+  checkins             checkins[]
+  churn_feedback       churn_feedback[]
+  conversations        conversations[]
+  customer_metrics     customer_metrics[]
+  customers            customers[]
+  data_access_log      data_access_log[]
+  exercises            exercises[]
+  funnel_events        funnel_events[]
+  goal_templates       goal_templates[]
+  inbody_metrics       inbody_metrics[]
+  inbound_messages     inbound_messages[]
+  integration_accounts integration_accounts[]
+  integrations         integrations[]
+  interactions         interactions[]
+  media_library        media_library[]
+  media_references     media_references[]
+  message_templates    message_templates[]
+  metric_definitions   metric_definitions[]
+  muscle_groups        muscle_groups[]
+  nutrition_facts      nutrition_facts[]
+  nutrition_meal_items nutrition_meal_items[]
+  nutrition_meals      nutrition_meals[]
+  nutrition_plans      nutrition_plans[]
+  outbound_messages    outbound_messages[]
+  payments             payments[]
+  plan_pricing         plan_pricing[]
+  progress_tracking    progress_tracking[]
+  referrals            referrals[]
+  scheduler_jobs       scheduler_jobs[]
+  subscriptions        subscriptions[]
+  system_settings      system_settings[]
+  team_members         team_members[]
+  tenant_branding      tenant_branding[]
+  currencies           currencies?            @relation(fields: [currency_id], references: [id])
+  tickets              tickets[]
+  training_plans       training_plans[]
+  training_types       training_types[]
+  uploaded_files       uploaded_files[]
+  ai_generation_logs   ai_generation_logs[]
+}
+
+model tickets {
+  id           BigInt          @id @default(autoincrement())
+  tenant_id    BigInt
+  customer_id  BigInt
+  category     ticket_category
+  priority     ticket_priority @default(P2)
+  status       ticket_status   @default(open)
+  subject      String
+  notes        String?
+  assigned_to  BigInt?
+  opened_at    DateTime        @default(now()) @db.Timestamptz(6)
+  closed_at    DateTime?       @db.Timestamptz(6)
+  team_members team_members?   @relation(fields: [assigned_to], references: [id])
+  customers    customers       @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants      tenants         @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, status], map: "idx_tickets_tenant_status")
+  @@index([tenant_id, customer_id], map: "idx_tickets_tenant_customer")
+  @@index([tenant_id, assigned_to], map: "idx_tickets_tenant_assigned")
+  @@index([tenant_id, opened_at], map: "idx_tickets_tenant_opened")
+}
+
+model training_plan_exercises {
+  id             BigInt         @id @default(autoincrement())
+  plan_id        BigInt
+  exercise_id    BigInt
+  sets           Int            @db.SmallInt
+  reps           Int            @db.SmallInt
+  order_index    Int            @db.SmallInt
+  created_at     DateTime       @default(now()) @db.Timestamptz(6)
+  exercises      exercises      @relation(fields: [exercise_id], references: [id])
+  training_plans training_plans @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+}
+
+model training_plans {
+  id                      BigInt                    @id @default(autoincrement())
+  tenant_id               BigInt
+  customer_id             BigInt
+  version                 Int
+  is_active               Boolean                   @default(true)
+  split                   String?
+  notes                   String?
+  created_by              BigInt
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  training_plan_exercises training_plan_exercises[]
+  team_members            team_members              @relation(fields: [created_by], references: [id])
+  customers               customers                 @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants                 tenants                   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@index([tenant_id, customer_id, created_at], map: "idx_training_customer")
+}
+
+model training_types {
+  id          BigInt      @id @default(autoincrement())
+  tenant_id   BigInt
+  name        Json
+  description Json?
+  media_url   String?
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  exercises   exercises[]
+  tenants     tenants     @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+
+  @@unique([tenant_id, name])
+}
+
+model uploaded_files {
+  id           BigInt        @id @default(autoincrement())
+  tenant_id    BigInt
+  blob_url     String
+  blob_id      String        @unique
+  filename     String
+  content_type String
+  size         Int
+  category     String
+  entity_type  String?
+  entity_id    BigInt?
+  customer_id  BigInt?
+  uploaded_by  BigInt?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  customers    customers?    @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  tenants      tenants       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  team_members team_members? @relation(fields: [uploaded_by], references: [id])
+
+  @@index([tenant_id, category], map: "idx_uploaded_files_category")
+  @@index([entity_type, entity_id], map: "idx_uploaded_files_entity")
+  @@index([tenant_id, customer_id], map: "idx_uploaded_files_tenant_customer")
+}
+
+model user_permissions {
+  id           BigInt       @id @default(autoincrement())
+  user_id      BigInt       @unique
+  permissions  Json         @default("{}")
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime     @default(now()) @db.Timestamptz(6)
+  team_members team_members @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model webhook_events {
+  id                    BigInt                 @id @default(autoincrement())
+  subscription_id       BigInt?
+  external_event_id     String?                @unique
+  topic                 String
+  payload               Json
+  received_at           DateTime               @default(now()) @db.Timestamptz(6)
+  processed_at          DateTime?              @db.Timestamptz(6)
+  status                webhook_status         @default(received)
+  error                 String?
+  webhook_subscriptions webhook_subscriptions? @relation(fields: [subscription_id], references: [id])
+}
+
+model webhook_subscriptions {
+  id                     BigInt               @id @default(autoincrement())
+  integration_account_id BigInt
+  topic                  String
+  callback_url           String
+  secret_ref             String?
+  is_active              Boolean              @default(true)
+  created_at             DateTime             @default(now()) @db.Timestamptz(6)
+  webhook_events         webhook_events[]
+  integration_accounts   integration_accounts @relation(fields: [integration_account_id], references: [id], onDelete: Cascade)
+}
+
+enum alert_channel {
+  email
+  slack
+  wa
+  sms
+}
+
+enum auth_type {
+  api_key
+  oauth2
+  jwt
+  basic
+  none
+}
+
+enum checkin_action {
+  no_change
+  adjust_nutrition
+  adjust_training
+  followup_needed
+}
+
+enum checkin_period {
+  biweekly
+  monthly
+  custom
+}
+
+enum customer_status {
+  lead
+  active
+  paused
+  expired
+  churned
+  paid_pending_kyc
+  lead_incomplete
+}
+
+enum dispatch_batch_status {
+  created
+  running
+  finished
+  failed
+  canceled
+}
+
+enum error_severity {
+  low
+  medium
+  high
+  critical
+}
+
+enum gender {
+  male
+  female
+  other
+}
+
+enum integration_type {
+  messaging
+  payments
+  storage
+  analytics
+  auth
+  other
+}
+
+enum interaction_channel {
+  wa
+  email
+  web
+}
+
+enum interaction_direction {
+  in
+  out
+}
+
+enum job_status {
+  success
+  failed
+  partial
+  canceled
+  queued
+}
+
+enum language {
+  en
+  ar
+}
+
+enum log_level {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+enum media_type {
+  image
+  video
+  document
+}
+
+enum outbound_message_status {
+  queued
+  sending
+  sent
+  failed
+  canceled
+  throttled
+  deferred
+}
+
+enum payment_gateway {
+  stripe
+  paymob
+  paypal
+  valu
+  sympl
+  halan
+}
+
+enum payment_status {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum queue_status {
+  parked
+  reprocessed
+  discarded
+}
+
+enum rate_limit_scope {
+  global
+  integration
+  customer
+}
+
+enum region {
+  MENA
+  NA
+  Other
+}
+
+enum resolution_action {
+  retry
+  ignore
+  manual
+}
+
+enum role {
+  admin
+  sales
+  coach
+  support
+  finance
+}
+
+enum service_status_type {
+  up
+  degraded
+  down
+}
+
+enum severity {
+  low
+  medium
+  high
+}
+
+enum source {
+  landing
+  social
+  sales
+  referral
+  campaign
+  post_payment
+}
+
+enum subscription_status {
+  trial
+  active
+  past_due
+  paused
+  cancelled
+  expired
+  paid_pending_kyc
+}
+
+enum task_status {
+  scheduled
+  running
+  done
+  failed
+}
+
+enum task_type {
+  anonymize
+  delete
+}
+
+enum ticket_category {
+  support
+  nutrition
+  workout
+  billing
+  health
+}
+
+enum ticket_priority {
+  P1
+  P2
+  P3
+}
+
+enum ticket_status {
+  open
+  pending
+  resolved
+  closed
+}
+
+enum webhook_status {
+  received
+  processed
+  failed
+  ignored
+}

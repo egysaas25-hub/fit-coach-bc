@@ -1,0 +1,58 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy" to confirm production deployment'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.fitcoach.com
+
+    steps:
+      - name: Validate confirmation
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "Deployment not confirmed"
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        env:
+          DEPLOY_KEY: ${{ secrets.PRODUCTION_DEPLOY_KEY }}
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+        run: |
+          echo "Deployment to production would happen here"
+          # Example deployment commands:
+          # ssh -i $DEPLOY_KEY user@$PRODUCTION_HOST "cd /app && git pull && docker-compose up -d --no-deps api"
+
+      - name: Run health checks
+        run: |
+          echo "Running health checks against production"
+          # Add your health check commands here
+          # Example: curl -f https://api.fitcoach.com/health || exit 1
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Rolling back deployment"
+          # Add rollback commands here
+
+      - name: Notify team
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Production deployment ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

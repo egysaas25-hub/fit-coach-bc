@@ -1,0 +1,59 @@
+name: Publish GraphQL Schema
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.ts'
+      - 'schema.gql'
+
+jobs:
+  publish-schema:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate schema
+        run: |
+          pnpm build
+          # Schema will be automatically generated when the app builds
+
+      - name: Check for breaking changes
+        id: breaking-changes
+        continue-on-error: true
+        run: |
+          echo "Checking for breaking changes in GraphQL schema"
+          # Add your schema comparison logic here
+          # You could use Apollo Studio or GraphQL Inspector
+
+      - name: Publish to schema registry
+        if: github.ref == 'refs/heads/main'
+        env:
+          APOLLO_KEY: ${{ secrets.APOLLO_KEY }}
+        run: |
+          echo "Publishing schema to registry"
+          # Example: npx apollo service:push --variant=production
+
+      - name: Notify frontend team
+        if: steps.breaking-changes.outcome == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: 'warning'
+          text: '⚠️ Breaking changes detected in GraphQL schema'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
