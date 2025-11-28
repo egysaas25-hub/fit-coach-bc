@@ -12,6 +12,9 @@ import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { ExercisesModule } from './exercises/exercises.module';
 import { WorkoutsModule } from './workouts/workouts.module';
+import { NutritionModule } from './nutrition/nutrition.module';
+import { AiModule } from './ai/ai.module';
+import { ProgressModule } from './progress/progress.module';
 
 @Module({
     imports: [
@@ -39,6 +42,9 @@ import { WorkoutsModule } from './workouts/workouts.module';
         CustomersModule,
         ExercisesModule,
         WorkoutsModule,
+        NutritionModule,
+        AiModule,
+        ProgressModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })
