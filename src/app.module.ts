@@ -31,7 +31,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
             driver: ApolloDriver,
             autoSchemaFile: join(process.cwd(), 'schema.gql'),
             sortSchema: true,
-            playground: process.env.NODE_ENV !== 'production',
+            playground: true,
+            introspection: true,
             formatError: (error) => {
                 return {
                     message: error.message,

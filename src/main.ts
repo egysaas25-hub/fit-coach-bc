@@ -30,7 +30,11 @@ async function bootstrap() {
 
     // Enable CORS
     app.enableCors({
-        origin: process.env.CORS_ORIGIN || '*',
+        origin: [
+            process.env.CORS_ORIGIN || 'http://localhost:3000',
+            'https://studio.apollographql.com',
+            'http://localhost:4000'
+        ],
         credentials: true,
     });
 
