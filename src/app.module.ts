@@ -18,6 +18,8 @@ import { ProgressModule } from './progress/progress.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { AutomationModule } from './automation/automation.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { SettingsModule } from './settings/settings.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
     imports: [
@@ -51,6 +53,8 @@ import { AnalyticsModule } from './analytics/analytics.module';
         MessagingModule,
         AutomationModule,
         AnalyticsModule,
+        SettingsModule,
+        SubscriptionsModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })

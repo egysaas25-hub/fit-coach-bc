@@ -20,7 +20,7 @@ export class AnalyticsService {
         });
 
         // Get total workouts and nutrition plans
-        const totalWorkouts = await this.prisma.workout_plans.count({ where });
+        const totalWorkouts = await this.prisma.training_plans.count({ where });
         const totalNutritionPlans = await this.prisma.nutrition_plans.count({ where });
 
         // Calculate average workouts per customer
@@ -57,7 +57,7 @@ export class AnalyticsService {
         } : {};
 
         // Count workouts
-        const workoutsCompleted = await this.prisma.workout_plans.count({
+        const workoutsCompleted = await this.prisma.training_plans.count({
             where: {
                 customer_id: BigInt(customerId),
                 ...dateWhere,
