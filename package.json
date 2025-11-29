@@ -38,6 +38,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.9",
     "@sentry/node": "^10.27.0",
+    "@supabase/supabase-js": "^2.86.0",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "bcryptjs": "^3.0.3",
@@ -45,13 +46,15 @@
     "class-validator": "^0.14.3",
     "dataloader": "^2.2.3",
     "graphql": "^16.12.0",
+    "graphql-query-complexity": "^1.1.0",
     "graphql-type-json": "^0.3.2",
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.13",

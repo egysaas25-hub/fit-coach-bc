@@ -74,6 +74,15 @@ export class ExercisesService {
         return this.mapToExercise(exercise);
     }
 
+    async findByIds(ids: string[]): Promise<Exercise[]> {
+        const exercises = await this.prisma.exercises.findMany({
+            where: {
+                id: { in: ids.map((id) => BigInt(id)) },
+            },
+        });
+        return exercises.map((e) => this.mapToExercise(e));
+    }
+
     private mapToExercise(exercise: any): Exercise {
         return {
             id: exercise.id.toString(),

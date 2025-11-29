@@ -8,6 +8,8 @@ import { CustomerFilterInput } from './dto/customer-filter.input';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '../users/entities/user.entity';
 import { UsersLoader } from '../users/users.loader';
+import { SubscriptionsLoader } from '../subscriptions/subscriptions.loader';
+import { Subscription } from '../subscriptions/entities/subscription.entity';
 
 @Resolver(() => Customer)
 @UseGuards(JwtAuthGuard)
@@ -15,6 +17,7 @@ export class CustomersResolver {
     constructor(
         private readonly customersService: CustomersService,
         private readonly usersLoader: UsersLoader,
+        private readonly subscriptionsLoader: SubscriptionsLoader,
     ) { }
 
     @Query(() => [Customer], { name: 'customers' })
@@ -62,5 +65,10 @@ export class CustomersResolver {
     async trainer(@Parent() customer: Customer) {
         if (!customer.trainerId) return null;
         return this.usersLoader.batchUsers.load(customer.trainerId);
+    }
+
+    @ResolveField(() => Subscription, { nullable: true })
+    async subscription(@Parent() customer: Customer) {
+        return this.subscriptionsLoader.batchSubscriptions.load(customer.id);
     }
 }

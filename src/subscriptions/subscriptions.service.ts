@@ -107,6 +107,16 @@ export class SubscriptionsService {
         return subscription.status === SubscriptionStatus.ACTIVE;
     }
 
+    async findByCustomerIds(customerIds: string[]): Promise<Subscription[]> {
+        const subscriptions = await this.prisma.subscriptions.findMany({
+            where: {
+                customer_id: { in: customerIds.map((id) => BigInt(id)) },
+                status: 'active', // Assuming we only want active subscriptions for the loader
+            },
+        });
+        return subscriptions.map((sub) => this.mapToSubscription(sub));
+    }
+
     private mapToSubscription(sub: any): Subscription {
         return {
             id: sub.id.toString(),

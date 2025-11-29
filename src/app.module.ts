@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { getComplexity, simpleEstimator } from 'graphql-query-complexity';
+import { GraphQLError } from 'graphql';
 import { PrismaModule } from './prisma/prisma.module';
 import { DateScalar } from './common/scalars/date.scalar';
 import { HealthResolver } from './common/resolvers/health.resolver';
@@ -20,6 +22,7 @@ import { AutomationModule } from './automation/automation.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { SettingsModule } from './settings/settings.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
     imports: [
@@ -33,6 +36,28 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
             sortSchema: true,
             playground: true,
             introspection: true,
+            validationRules: [
+                (context) => ({
+                    Field: {
+                        enter: (node) => {
+                            const complexity = getComplexity({
+                                schema: context.getSchema(),
+                                query: context.getDocument(),
+                                estimators: [
+                                    simpleEstimator({ defaultComplexity: 1 }),
+                                ],
+                            });
+                            if (complexity > 1000) {
+                                context.reportError(
+                                    new GraphQLError(
+                                        `Query is too complex: ${complexity}. Maximum allowed complexity: 1000`,
+                                    ),
+                                );
+                            }
+                        },
+                    },
+                }),
+            ],
             formatError: (error) => {
                 return {
                     message: error.message,
@@ -56,6 +81,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
         AnalyticsModule,
         SettingsModule,
         SubscriptionsModule,
+        UploadsModule,
     ],
     providers: [DateScalar, BigIntScalar, HealthResolver],
 })
